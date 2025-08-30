@@ -22,10 +22,9 @@ spring:
 
   liquibase:
     enabled: true
-    change-log: classpath:db/changelog/db.changelog-master.xml
+    change-log: classpath:liquibase/master.xml
     contexts:
     default-schema: public
     drop-first: false
     database-change-log-table: databasechangelog
     database-change-log-lock-table: databasechangeloglock
-    log-level: info
