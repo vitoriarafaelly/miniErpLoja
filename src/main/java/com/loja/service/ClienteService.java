@@ -7,16 +7,15 @@ import com.loja.model.Cliente;
 import com.loja.repository.ClienteRepository;
 import com.loja.service.api.viacep.ViaCepClient;
 import com.loja.service.api.viacep.dto.ViaCepResponse;
-import jakarta.transaction.Transactional;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.nio.channels.FileChannel;
 import java.util.List;
-import java.util.Optional;
 
 @Log4j2
 @Service
@@ -41,7 +40,7 @@ public class ClienteService {
             log.info("Cliente criado com sucesso");
             return mapper.map(cliente, ClienteResponse.class);
         }catch (Exception e){
-            throw new ClienteException("Erro ao criar cliente", e);
+            throw new ClienteException("Erro ao criar cliente: " + e.getMessage(), e);
         }
 
     }
@@ -61,14 +60,15 @@ public class ClienteService {
         }
     }
 
-    private Cliente buscarClientePorId(Long id) throws ClienteException {
+    public Cliente buscarClientePorId(Long id) {
         return clienteRepository.findById(id)
-                .orElseThrow(() -> new ClienteException("Cliente não encontrado"));//capturar e tratar essas exceções
+                .orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado"));
 
     }
 
     private Cliente salvar(Cliente cliente) throws ClienteException {
         try {
+            log.info("Salvando cliente...");
             return clienteRepository.save(cliente);
         } catch (DataIntegrityViolationException e) {
             throw new ClienteException("Erro de integridade ao salvar Cliente: " + e.getMessage(), e);
@@ -94,7 +94,7 @@ public class ClienteService {
         }
     }
 
-    public ClienteResponse buscar(Long id) throws ClienteException {
+    public ClienteResponse buscar(Long id){
         Cliente cliente = buscarClientePorId(id);
         return mapper.map(cliente, ClienteResponse.class);
     }
@@ -104,6 +104,18 @@ public class ClienteService {
                 .stream()
                 .map(cliente ->  mapper.map(cliente, ClienteResponse.class))
                 .toList();
+    }
+
+    public Page<ClienteResponse> listar(String nome, String email, Pageable pageable) {
+        Page<Cliente> page;
+        if (nome != null) {
+            page = clienteRepository.findByNomeContainingIgnoreCase(nome, pageable);
+        } else if (email != null) {
+            page = clienteRepository.findByEmailContainingIgnoreCase(email, pageable);
+        } else {
+            page = clienteRepository.findAll(pageable);
+        }
+        return page.map(p -> mapper.map(p, ClienteResponse.class));
     }
 
 

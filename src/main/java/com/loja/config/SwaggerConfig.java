@@ -14,6 +14,6 @@ public class SwaggerConfig {
                 .info(new Info()
                         .title("Mini ERP Loja")
                         .version("1.0")
-                        .description("Documentação da API com Swagger/OpenAPI"));
+                        .description("Mini-ERP de Pedidos"));
     }
 }
