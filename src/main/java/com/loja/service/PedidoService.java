@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -157,5 +158,15 @@ public class PedidoService {
             page = pedidoRepository.findAll(pageable);
         }
         return page.map(p -> modelMapper.map(p, PedidoResponse.class));
+    }
+
+    public List<Pedido> buscarPedidosAtrasados(StatusPedido statusPedido, LocalDateTime limite) {
+        log.info("Buscando pedidos atrasados...");
+        return pedidoRepository.findByStatusAndDataHoraCriacaoBefore(statusPedido, limite);
+    }
+
+    public void salvarTodos(List<Pedido> pedidos) {
+        log.info("Salvando pedidos...");
+        pedidoRepository.saveAll(pedidos);
     }
 }

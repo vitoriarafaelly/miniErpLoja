@@ -94,4 +94,8 @@ public class ProdutoService {
         }
         return page.map(p -> modelMapper.map(p, ProdutoResponse.class));
     }
+
+    public List<Produto> buscarProdutosCriticos() {
+        return produtoRepository.findByEstoqueLessThanEstoqueMinimo();
+    }
 }
