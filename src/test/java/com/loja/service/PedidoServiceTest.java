@@ -11,6 +11,8 @@ import com.loja.model.Pedido;
 import com.loja.model.Produto;
 import com.loja.model.domain.StatusPedido;
 import com.loja.repository.PedidoRepository;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,6 +46,12 @@ class PedidoServiceTest {
     @InjectMocks
     private PedidoService pedidoService;
 
+    @Mock
+    private MeterRegistry meterRegistry;
+
+    @Mock
+    private Counter pedidosCounter;
+
     private Cliente cliente;
     private Produto produto;
     private Pedido pedido;
@@ -51,6 +59,9 @@ class PedidoServiceTest {
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);
+
+        when(meterRegistry.counter("pedidos_criados_total")).thenReturn(pedidosCounter);
+        pedidoService = new PedidoService(pedidoRepository, clienteService, produtoService, modelMapper, meterRegistry);
 
         cliente = new Cliente();
         cliente.setId(1L);
@@ -88,6 +99,7 @@ class PedidoServiceTest {
         PedidoResponse response = pedidoService.criar(request);
 
         assertNotNull(response);
+        verify(pedidosCounter).increment();
         verify(pedidoRepository, times(1)).save(any(Pedido.class));
     }
 

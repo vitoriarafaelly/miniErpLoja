@@ -11,6 +11,8 @@ import com.loja.model.Pedido;
 import com.loja.model.Produto;
 import com.loja.model.domain.StatusPedido;
 import com.loja.repository.PedidoRepository;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
@@ -38,11 +40,14 @@ public class PedidoService {
 
     private final ModelMapper modelMapper;
 
-    public PedidoService(PedidoRepository pedidoRepository, ClienteService clienteService, ProdutoService produtoService, ModelMapper modelMapper) {
+    private final Counter pedidosCriadosCounter;
+
+    public PedidoService(PedidoRepository pedidoRepository, ClienteService clienteService, ProdutoService produtoService, ModelMapper modelMapper, MeterRegistry meterRegistry) {
         this.pedidoRepository = pedidoRepository;
         this.clienteService = clienteService;
         this.produtoService = produtoService;
         this.modelMapper = modelMapper;
+        this.pedidosCriadosCounter = meterRegistry.counter("pedidos_criados_total");
     }
 
     @Transactional
@@ -93,6 +98,7 @@ public class PedidoService {
             pedido.setTotal(subtotal.subtract(totalDesconto).setScale(2, RoundingMode.HALF_EVEN));
 
             Pedido pedidoSalvo = salvar(pedido);
+            pedidosCriadosCounter.increment();
             return modelMapper.map(pedidoSalvo, PedidoResponse.class);
         }
         catch (EstoqueInsuficienteException e) {

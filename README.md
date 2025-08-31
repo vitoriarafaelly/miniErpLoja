@@ -48,3 +48,9 @@ Banco: loja_db
 Usuário: admin
 
 Senha: password
+
+### Swagger
+http://localhost:8080/swagger-ui/index.html#/
+
+### Observabilidade
+http://localhost:8080/actuator/prometheus
