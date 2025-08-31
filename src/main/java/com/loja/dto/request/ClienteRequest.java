@@ -29,9 +29,9 @@ public class ClienteRequest {
     private String cidade;
 
     @Size(max = 2, message = "UF deve ter 2 caracteres")
-    String uf;
+    private String uf;
 
     @NotBlank(message = "CEP é obrigatório")
     @Size(max = 8)
-    String cep;
+    private String cep;
 }

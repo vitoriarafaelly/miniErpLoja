@@ -31,7 +31,7 @@ public class ClienteController {
 
     @PostMapping
     @Operation(summary = "Cadastra um novo cliente")
-    public ResponseEntity<ClienteResponse> criar(@Valid @RequestBody ClienteRequest clienteRequest) throws ClienteException {
+    public ResponseEntity<ClienteResponse> criar(@RequestBody @Valid ClienteRequest clienteRequest) throws ClienteException {
         ClienteResponse response = clienteService.criar(clienteRequest);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(response.getId()).toUri();
         return ResponseEntity.created(uri).body(response);
