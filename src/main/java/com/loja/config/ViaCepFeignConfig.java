@@ -13,8 +13,8 @@ public class ViaCepFeignConfig {
         return (key, response) -> {
             int status = response.status();
             return switch (status) {
-                case 400 -> new CepFormatoInvalidoException("CEP em formato inválido (400)");
-                case 404 -> new CepNaoEncontradoException("CEP não encontrado (404).");
+                case 400 -> new CepFormatoInvalidoException("CEP em formato inválido");
+                case 404 -> new CepNaoEncontradoException("CEP não encontrado");
                 default -> new ViaCepIndisponivelException("Erro ViaCEP: " + status);
             };
         };
