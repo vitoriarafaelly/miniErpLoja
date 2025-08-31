@@ -94,6 +94,9 @@ public class PedidoService {
 
             Pedido pedidoSalvo = salvar(pedido);
             return modelMapper.map(pedidoSalvo, PedidoResponse.class);
+        }
+        catch (EstoqueInsuficienteException e) {
+            throw e;
         }catch (Exception e){
             throw new PedidoException("Erro ao criar pedido: " + e.getMessage(), e);
         }
