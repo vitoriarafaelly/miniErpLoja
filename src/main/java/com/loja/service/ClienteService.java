@@ -2,7 +2,10 @@ package com.loja.service;
 
 import com.loja.dto.request.ClienteRequest;
 import com.loja.dto.response.ClienteResponse;
+import com.loja.exception.CepFormatoInvalidoException;
+import com.loja.exception.CepNaoEncontradoException;
 import com.loja.exception.ClienteException;
+import com.loja.exception.ViaCepIndisponivelException;
 import com.loja.model.Cliente;
 import com.loja.repository.ClienteRepository;
 import com.loja.service.api.viacep.ViaCepClient;
@@ -49,13 +52,30 @@ public class ClienteService {
         if (clienteRequest.getLogradouro() == null || clienteRequest.getBairro() == null ||
                 clienteRequest.getCidade() == null || clienteRequest.getUf() == null) {
 
-            log.info("Realizando chamada para consulta de cep");
-            ViaCepResponse viaCep = viaCepClient.buscarCep(clienteRequest.getCep().replaceAll("\\D", ""));
-            if (viaCep != null) {
+            try {
+                log.info("Realizando chamada para consulta de CEP");
+                ViaCepResponse viaCep = viaCepClient.buscarCep(
+                        clienteRequest.getCep().replaceAll("\\D", "")
+                );
+
+                if (Boolean.TRUE.equals(viaCep.getErro())) {
+                    log.error("CEP inexistente segundo ViaCEP.");
+                }
+
                 if (clienteRequest.getLogradouro() == null) clienteRequest.setLogradouro(viaCep.getLogradouro());
                 if (clienteRequest.getBairro() == null) clienteRequest.setBairro(viaCep.getBairro());
                 if (clienteRequest.getCidade() == null) clienteRequest.setCidade(viaCep.getCidade());
                 if (clienteRequest.getUf() == null) clienteRequest.setUf(viaCep.getUf());
+
+            } catch (CepFormatoInvalidoException e) {
+                log.warn("CEP em formato inválido: {}", clienteRequest.getCep());
+                throw e;
+            } catch (CepNaoEncontradoException e) {
+                log.warn("CEP não encontrado: {}", clienteRequest.getCep());
+                throw e;
+            } catch (ViaCepIndisponivelException | feign.RetryableException e) {
+                log.error("Erro de rede ao chamar ViaCEP. Tentativas esgotadas. CEP={} Erro={}", clienteRequest.getCep(), e.getMessage());
+                throw new ViaCepIndisponivelException("Serviço ViaCEP indisponível, tente novamente mais tarde.");
             }
         }
     }
@@ -118,7 +138,6 @@ public class ClienteService {
         return page.map(p -> mapper.map(p, ClienteResponse.class));
     }
 
-
     public void deletar(Long id) throws ClienteException {
         Cliente cliente = buscarClientePorId(id);
         try {
@@ -129,7 +148,5 @@ public class ClienteService {
             throw new ClienteException("Erro inesperado ao excluir cliente: " + e.getMessage(), e);
         }
     }
-
-
 
 }

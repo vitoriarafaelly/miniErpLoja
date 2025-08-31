@@ -17,4 +17,6 @@ public class ViaCepResponse {
 
     @JsonProperty("uf")
     private String uf;
+
+    private Boolean erro;
 }
