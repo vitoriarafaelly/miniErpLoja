@@ -11,6 +11,7 @@ import com.loja.model.Pedido;
 import com.loja.model.Produto;
 import com.loja.model.domain.StatusPedido;
 import com.loja.repository.PedidoRepository;
+import com.loja.service.api.exchangerate.ExchangeService;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.persistence.EntityNotFoundException;
@@ -20,6 +21,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -42,12 +44,15 @@ public class PedidoService {
 
     private final Counter pedidosCriadosCounter;
 
-    public PedidoService(PedidoRepository pedidoRepository, ClienteService clienteService, ProdutoService produtoService, ModelMapper modelMapper, MeterRegistry meterRegistry) {
+    private final ExchangeService exchangeService;
+
+    public PedidoService(PedidoRepository pedidoRepository, ClienteService clienteService, ProdutoService produtoService, ModelMapper modelMapper, MeterRegistry meterRegistry, ExchangeService exchangeService) {
         this.pedidoRepository = pedidoRepository;
         this.clienteService = clienteService;
         this.produtoService = produtoService;
         this.modelMapper = modelMapper;
         this.pedidosCriadosCounter = meterRegistry.counter("pedidos_criados_total");
+        this.exchangeService = exchangeService;
     }
 
     @Transactional
@@ -177,5 +182,12 @@ public class PedidoService {
     public void salvarTodos(List<Pedido> pedidos) {
         log.info("Salvando pedidos...");
         pedidoRepository.saveAll(pedidos);
+    }
+
+    public BigDecimal getOrderTotalInUsd(Long id) {
+        Pedido pedido = buscarPedidoPorId(id);
+
+        BigDecimal taxa = exchangeService.getBrlToUsdRate();
+        return pedido.getTotal().multiply(taxa).setScale(2, RoundingMode.HALF_UP);
     }
 }

@@ -11,6 +11,7 @@ import com.loja.model.Pedido;
 import com.loja.model.Produto;
 import com.loja.model.domain.StatusPedido;
 import com.loja.repository.PedidoRepository;
+import com.loja.service.api.exchangerate.ExchangeService;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.persistence.EntityNotFoundException;
@@ -36,10 +37,13 @@ class PedidoServiceTest {
 
     @Mock
     private PedidoRepository pedidoRepository;
+
     @Mock
     private ClienteService clienteService;
+
     @Mock
     private ProdutoService produtoService;
+
     @Mock
     private ModelMapper modelMapper;
 
@@ -52,6 +56,9 @@ class PedidoServiceTest {
     @Mock
     private Counter pedidosCounter;
 
+    @Mock
+    private ExchangeService exchangeService;
+
     private Cliente cliente;
     private Produto produto;
     private Pedido pedido;
@@ -61,7 +68,7 @@ class PedidoServiceTest {
         MockitoAnnotations.openMocks(this);
 
         when(meterRegistry.counter("pedidos_criados_total")).thenReturn(pedidosCounter);
-        pedidoService = new PedidoService(pedidoRepository, clienteService, produtoService, modelMapper, meterRegistry);
+        pedidoService = new PedidoService(pedidoRepository, clienteService, produtoService, modelMapper, meterRegistry, exchangeService);
 
         cliente = new Cliente();
         cliente.setId(1L);
