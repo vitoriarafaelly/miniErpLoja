@@ -5,6 +5,7 @@ import com.loja.dto.response.PedidoResponse;
 import com.loja.model.domain.StatusPedido;
 import com.loja.service.PedidoService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +17,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/pedidos")
 @Tag(name = "Pedidos", description = "Gerenciamento de pedidos")

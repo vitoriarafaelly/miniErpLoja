@@ -5,6 +5,7 @@ import com.loja.dto.response.ProdutoResponse;
 import com.loja.exception.ProdutoException;
 import com.loja.service.ProdutoService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -18,6 +19,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/produtos")
 @Tag(name = "Produtos", description = "Gerenciamento de produtos")

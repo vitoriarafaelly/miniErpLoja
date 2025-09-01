@@ -1,6 +1,7 @@
 package com.loja.rest.controller;
 
 import com.loja.service.PedidoService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/orders")
 @Tag(name = "Orders", description = " Cotação BRL→USD")
